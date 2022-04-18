@@ -1,0 +1,17 @@
+.*.swp
+Terraform/*.tfstate*
+Terraform/.terraform
+Terraform/.terraform.lock.hcl
+Terraform/*/*.tfstate*
+Terraform/*/.terraform
+Terraform/*/.terraform.lock.hcl
+Terraform/ssh.pub
+Terraform/terraform_apply.txt
+Terraform/*/terraform_apply.txt
+Terraform/libvirt/rhel8.qcow2
+Ansible/ansible.log
+Ansible/group_vars/all/terraform_outputs.var
+Ansible/group_vars/all/support_terraform_outputs.var
+Ansible/group_vars/all/subscription.data
+Ansible/vault-id
+Ansible/pull-secret

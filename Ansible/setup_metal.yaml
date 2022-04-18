@@ -1,0 +1,108 @@
+---
+- name: Local tasks
+  hosts: 127.0.0.1
+  connection: local
+  become: no
+  tasks:
+    - name: Remove stale entries from known_hosts file in the ansible host
+      command: ssh-keygen -R {{ item }}
+      loop:
+        - "{{ groups['baremetal'] | first }}"
+      ignore_errors: yes
+    - name: Save terraform variables to a file
+      shell: terraform output |tr '=' ':' > ../Ansible/group_vars/all/terraform_outputs.var
+      args:
+        chdir: ../Terraform
+    - name: Load terraform output variables
+      include_vars:
+        file: group_vars/all/terraform_outputs.var
+    - name: Update inventory file
+      blockinfile:
+        path: inventory
+        block: "{{ baremetal_public_ip }}"
+        insertafter: "^\\[baremetal\\]$"
+    - name: Reload inventory
+      meta: refresh_inventory
+- name: Setup baremetal host
+  hosts: baremetal
+  gather_facts: no
+  tasks:
+    - name: Load terraform output variables
+      include_vars:
+        dir: group_vars/all
+        extensions:
+          - 'data'
+          - 'var'
+        ignore_unknown_extensions: yes
+    - name: Wait for EC2 instance connection to become available
+      wait_for_connection:
+        timeout: 300
+    - name: Subscribe with Red Hat
+      redhat_subscription:
+        state: present
+        activationkey: "{{ subscription_activationkey }}"
+        org_id: "{{ subscription_org_id }}"
+#Create and setup the partition for the default libvirt storage pool
+    - name: Create a primary partition in nvme1n1
+      parted:
+        device: /dev/nvme1n1
+        number: 1
+        label: gpt
+        state: present
+    - name: Format the partition created
+      filesystem:
+        fstype: xfs
+        dev: /dev/nvme1n1p1
+    - name: Mount partition in /var/lib/libvirt/images
+      mount:
+        path: /var/lib/libvirt/images
+        src: /dev/nvme1n1p1
+        fstype: xfs
+        state: mounted
+    - name: Set permissions for mountpoint
+      file:
+        path: /var/lib/libvirt/images
+        mode: '0751' 
+    - name: Apply new SELinux file context to filesystem
+      command: restorecon -R -Fv /var/lib/libvirt/images/
+
+    - name: Install required packages
+      dnf:
+        name: 
+          - '@virtualization-host-environment'
+          - virt-install
+          - libguestfs-tools
+          - tmux
+          - git
+          - gcc
+          - libvirt-devel
+          - ipmitool
+          - httpd-tools
+        state: present
+    - name: Enable and start firewalld service
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+    - name: Add ec2-user to libvirt group
+      user:
+        name: ec2-user
+        groups: libvirt
+        append: yes
+    - name: Enable and start libvirt service
+      service:
+        name: libvirtd
+        state: started
+        enabled: yes
+    - name: Update OS and reboot host
+      block:
+        - name: Update OS
+          dnf:
+            name: "*"
+            state: latest
+          register: _os_update
+        - name: Reboot if OS updated
+          reboot:
+            reboot_timeout: 1300
+          when: _os_update.changed == True
+      when: update_OS|bool
