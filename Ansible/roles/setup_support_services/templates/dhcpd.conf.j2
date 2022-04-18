@@ -1,0 +1,19 @@
+option domain-name "{{ dns_zone }}";
+default-lease-time 86400;
+max-lease-time 86400;
+log-facility local7;
+
+subnet {{ chucky_short_net }}.0 netmask 255.255.255.0 {
+  range {{ chucky_short_net }}.80  {{ chucky_short_net }}.100;
+  option domain-name-servers {{ chucky_short_net }}.3;
+  option domain-name "{{ dns_zone }}";
+  option domain-search "{{ dns_zone }}";
+  option routers {{ chucky_short_net }}.1;
+  option subnet-mask 255.255.255.0;
+}
+
+host sno {
+  hardware ethernet {{ sno_mac }};
+  fixed-address {{ chucky_short_net }}.100;
+  option host-name "sno.{{ dns_zone }}";
+}

@@ -52,18 +52,6 @@ The list of variables its purpose and default value are:
 
      Default values: memory = 24576    vcpu = 4
 
-* **worker_resources**.- Object variable with two fields:
-
-     memory.- The ammount of memory in MB to be assigned to the worker VMs
-
-     vcpu.- The number of CPUS to be assigned to the worker VMs
-
-     Default values: memory = "16384"   vcpu = 4
-
-* **number_of_workers**.- How many worker nodes will be created by terraform.  The number must be between 1 and 16.
-
-     Default value: 3
-
 * **chucky_net_addr**.- Network address for the routable network where all VMs are connected
 
      Default value: 192.168.30.0/24
@@ -84,13 +72,9 @@ The list of variables its purpose and default value are:
 
      Default value: 4.9.5
 
-* **worker_provision_mac_base**.- MAC address common part for the worker NICs in the provisioning network.  The last character for the MAC address will be assigned dynamically by terraform and ansible allowing the creation of up to 16 addresseses, from 52:54:00:74:dc:d0 to  52:54:00:74:dc:df.  The letters in the MACs should be in lowercase.
+* **sno_mac**.- MAC address for the SNO VM NIC in the routable (chucky) network.  This is used in the DHCP server to assign a known IP to the provision VM in the chucky network.  The letters in the MACs should be in lowercase.
 
-     Default value: 52:54:00:74:dc:d
-
-* **worker_chucky_mac_base**.- MAC address common part for the worker NICs in the chucky network.  The last character for the MAC address will be assigned dynamically by terraform and ansible allowing the creation of up to 16 addresseses, from 52:54:00:a9:6d:90  to 52:54:00:a9:6d:9f.  The letters in the MACs should be in lowercase.
-
-     Default value: 52:54:00:a9:6d:9
+     Default value: 52:54:00:9d:41:3c
 
 ### Assigning values to input variables
 
@@ -112,9 +96,8 @@ $ terraform apply -var='number_of_workers=6'  -var='cluster_name="monaco"' -var=
 * Add the variable assignments to a file and call that file in the command line.  For example, the following content is added to the file monaco.vars
 
 ```
-number_of_workers = 6  
 cluster_name = "monaco"
-worker_resources = {"memory":"16384","vcpu":6}
+support_resources = {"memory":"16384","vcpu":6}
 chucky_net_addr = "192.168.55.0/24"
 support_net_config_nameserver = "169.254.169.253"
 dns_zone = "benaka.cc"
@@ -152,8 +135,6 @@ The template creates the following components:
 * A disk volume based on the RHEL8 base volume that will be the OS disk for the support VM.  
 * A cloud init disk for the support VM, containing the user data and network configuration defined by two template files.
 * A support VM.  This VM runs the DHCP and DNS services for the OCP cluster.  It is only connected to the routable (chucky) network.
-* A group of empty disk volumes that will be the OS disks for the worker VMs.  The ammount created depends on the variable number_of_workers.
-* A group of worker VMs.  Connected to the routable and provision (if available) networks.  The ammount created depends on the variable number_of_workers.
 
 ## Dependencies 
 This terraform template depends on the output variables from the main terraform template that creates the metal instance in AWS.  The output variables are obtained from a local backend:

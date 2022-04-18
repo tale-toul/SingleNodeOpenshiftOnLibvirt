@@ -17,29 +17,6 @@ variable "support_resources" {
   }
 }
 
-variable "worker_resources" {
-  description = "Ammount of CPU and memory resources assigned to the worker VMs"
-  type = object({
-    memory = string
-    vcpu = number
-  })
-  default = {
-    memory = "16384"
-    vcpu = 4
-  }
-}
-
-variable "number_of_workers" {
-  description = "How many worker VMs to create"
-  type = number
-  default = 3
-
-  validation {
-    condition = var.number_of_workers > 0 && var.number_of_workers <= 16
-    error_message = "The number of workers that can be created with terraform must be between 1 and 16."
-  }
-}
-
 variable "chucky_net_addr" {
   description = "Network address for the routable chucky network"
   type = string
@@ -72,10 +49,10 @@ variable "ocp_version" {
 
 #MAC ADDRESSES
 #The letters in the MACs should be in lowercase
-variable "worker_chucky_mac_base" {
-  description = "MAC address common part for the worker NICs in the chucky network"
+variable "sno_mac" {
+  description = "MAC address for the SNO VM NIC in the routable (chucky) network"
   type = string
-  default = "52:54:00:a9:6d:9"
+  default = "52:54:00:d9:14:42"
 }
 
 locals {

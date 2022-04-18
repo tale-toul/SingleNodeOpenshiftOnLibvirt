@@ -1,0 +1,14 @@
+$TTL        86400
+@           IN          SOA         {{ dns_zone }}. root.{{ dns_zone }}.  (
+        202202023 ; serial
+        28800          ; refresh
+        14400          ; retry
+        3600000        ; expire
+        86400 )        ; minimum
+                IN  NS          support.{{ dns_zone }}.
+3               IN  PTR         support.{{ dns_zone }}.
+
+100             IN  PTR         api.{{ cluster_name }}.{{ dns_zone }}.
+100             IN  PTR         api-int.{{ cluster_name }}.{{ dns_zone }}.
+100             IN  PTR         sno.{{ cluster_name }}.{{ dns_zone }}.
+

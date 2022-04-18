@@ -45,62 +45,6 @@ resource "libvirt_volume" "rhel_volume" {
   depends_on = [libvirt_pool.pool_default]
 }
 
-##WORKER NODES
-##Worker volumes
-#resource "libvirt_volume" "worker_volumes" {
-#  count = var.number_of_workers
-#  name = "worker${count.index}.qcow2"
-#  pool = "default"
-#  format = "qcow2"
-#  #120GB
-#  size = 128849018880
-#  depends_on = [libvirt_pool.pool_default]
-#}
-#
-##Worker VMs
-#resource "libvirt_domain" "worker_domains" {
-#  count = var.number_of_workers
-#  name = "sno-worker${count.index}"
-#  running = false
-#  autostart = false
-#
-#  memory = var.worker_resources.memory
-#  vcpu   = var.worker_resources.vcpu
-#
-#  disk {
-#    volume_id = libvirt_volume.worker_volumes[count.index].id
-#  }
-#
-#  dynamic "network_interface" {
-#    for_each = toset(libvirt_network.provision[*].id)
-#    content {
-#      network_id = network_interface.key
-#      mac        = format("${var.worker_provision_mac_base}%x",count.index)
-#    }
-#  }
-#
-#  network_interface {
-#    network_id = libvirt_network.chucky.id
-#    mac        = format("${var.worker_chucky_mac_base}%x",count.index)
-#  }
-#
-#  boot_device {
-#    dev = ["hd","network"]
-#  }
-#
-#  graphics {
-#    type = "vnc"
-#    listen_type = "address"
-#    listen_address = "0.0.0.0"
-#  }
-#
-#  console {
-#    type        = "pty"
-#    target_port = "0"
-#    target_type = "virtio"
-#  }
-#}
-
 #Support VM
 #Support volume
 resource "libvirt_volume" "support_volume" {

@@ -4,3 +4,12 @@
 # END ANSIBLE MANAGED BLOCK
 
 [support]
+# BEGIN Ansible block for support and provision
+192.168.30.3
+# END Ansible block for support and provision
+
+[support:vars]
+# BEGIN Ansible block for support variables
+ansible_ssh_common_args='-o ProxyJump="ec2-user@52.206.39.86"' 
+# END Ansible block for support variables
+ansible_user=root

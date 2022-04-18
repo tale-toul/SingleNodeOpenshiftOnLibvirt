@@ -1,0 +1,14 @@
+$TTL 1D
+@           IN SOA   {{ dns_zone }}. root.{{ dns_zone }}. (
+                                            0           ; serial
+                                            1D          ; refresh
+                                            1H          ; retry
+                                            1W          ; expire
+                                            3H )        ; minimum
+                     IN         NS          support.{{ dns_zone }}.
+support              IN         A           {{ chucky_short_net }}.3
+
+api.{{ cluster_name }}                  IN            A          {{ chucky_short_net }}.100
+api-int.{{ cluster_name }}              IN            A          {{ chucky_short_net }}.100
+*.apps.{{ cluster_name }}               IN            A          {{ chucky_short_net }}.100
+sno.{{ cluster_name }}                  IN            A          {{ chucky_short_net }}.100
