@@ -17,6 +17,18 @@ variable "support_resources" {
   }
 }
 
+variable "sno_resources" {
+  description = "Ammount of CPU and memory resources assigned to the SNO VM"
+  type = object({
+    memory = string
+    vcpu = number
+  })
+  default = {
+    memory = "32768"
+    vcpu = 8
+  }
+}
+
 variable "chucky_net_addr" {
   description = "Network address for the routable chucky network"
   type = string

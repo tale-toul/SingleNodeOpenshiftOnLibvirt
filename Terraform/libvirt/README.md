@@ -52,6 +52,14 @@ The list of variables its purpose and default value are:
 
      Default values: memory = 24576    vcpu = 4
 
+* **sno_resources**.-  Object variable with two fields:
+
+     memory.- The ammount of memory in MB to be assigned to the sno VM
+
+     vcpu.- The number of CPUS to be assigned to the sno VM
+
+     Default values: memory = 32768 (32GB)   vcpu = 8
+
 * **chucky_net_addr**.- Network address for the routable network where all VMs are connected
 
      Default value: 192.168.30.0/24

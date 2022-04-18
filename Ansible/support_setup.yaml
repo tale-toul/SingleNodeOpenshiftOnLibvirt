@@ -86,19 +86,8 @@
 #          - 'var'
 #        ignore_unknown_extensions: yes
 #
-#    - name: Enable access to the KVM Virtual Machines VNC displays
-#      firewalld:
-#        port: "{{ 5900 + x }}/tcp"
-#        zone: public
-#        permanent: yes
-#        immediate: yes
-#        state: enabled
-#      # 3 masters + 2 (support and provisioning) + workers
-#      loop: "{{ range(0, 3 + 2 + number_of_workers)|list}}"
-#      loop_control:
-#        index_var: x
 
-##Set up provision VM
+#Set up provision VM
 #- name: Set up provision VM
 #  hosts: provision
 #  gather_facts: no
@@ -158,13 +147,6 @@
 #      loop:
 #        - firewalld
 #        - libvirtd
-#    - name: Enable http service in firewall
-#      firewalld:
-#        service: http
-#        zone: public
-#        permanent: yes
-#        immediate: yes
-#        state: enabled
 #    - name: Copy terraform template to create default storage pool in provisioning VM
 #      synchronize:
 #        src: ../Terraform/provision

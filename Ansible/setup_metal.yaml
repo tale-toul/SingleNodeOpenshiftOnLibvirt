@@ -94,6 +94,19 @@
         name: libvirtd
         state: started
         enabled: yes
+
+    - name: Enable access to the KVM Virtual Machines VNC displays
+      firewalld:
+        port: "{{ 5900 + x }}/tcp"
+        zone: public
+        permanent: yes
+        immediate: yes
+        state: enabled
+      # Support and SNO VMs
+      loop: "{{ range(0, 2 }}"
+      loop_control:
+        index_var: x
+
     - name: Update OS and reboot host
       block:
         - name: Update OS

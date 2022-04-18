@@ -91,3 +91,49 @@ resource "libvirt_domain" "support_domain" {
     target_type = "virtio"
   }
 }
+
+#SNO VM
+#SNO volume
+resource "libvirt_volume" "sno_volume" {
+  name = "sno.qcow2"
+  pool = "default"
+  format = "qcow2"
+  #120GB
+  size = 128849018880
+  depends_on = [libvirt_pool.pool_default]
+}
+
+#SNO VM
+resource "libvirt_domain" "sno_domain" {
+  name = "sno"
+  running = false
+  autostart = false
+
+  memory = var.sno_resources.memory
+  vcpu   = var.sno_resources.vcpu
+
+  disk {
+    volume_id = libvirt_volume.sno_volume.id
+  }
+
+  network_interface {
+    network_id = libvirt_network.chucky.id
+    mac        = var.sno_mac
+  }
+
+  boot_device {
+    dev = ["hd","network"]
+  }
+
+  graphics {
+    type = "vnc"
+    listen_type = "address"
+    listen_address = "0.0.0.0"
+  }
+
+  console {
+    type        = "pty"
+    target_port = "0"
+    target_type = "virtio"
+  }
+}
