@@ -103,9 +103,81 @@
         immediate: yes
         state: enabled
       # Support and SNO VMs
-      loop: "{{ range(0, 2 }}"
+      loop: "{{ range(0, 2) | list }}"
       loop_control:
         index_var: x
+
+    - name: Add the user kni
+      user:
+        name: kni
+        groups: libvirt
+    - name: Authorize an ssh key for kni user
+      authorized_key:
+        user: kni
+        state: present
+        key: "{{ lookup('file', '../Terraform/'+ssh_certificate)  }}"
+    - name: Add sudo privileges to kni
+      lineinfile:
+        path: /etc/sudoers.d/kni
+        line: kni ALL=(root) NOPASSWD:ALL
+        create: yes
+        mode: 0440
+    - name: Create {{ cluster_name }} directory
+      file:
+        path: /home/kni/{{ cluster_name }}
+        state: directory
+        owner: kni
+        group: kni
+        mode: '0750'
+    - name: Download oc client file
+      unarchive:
+        src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux.tar.gz
+        dest: /home/kni
+        remote_src: yes
+    - name: Copy oc client to /usr/local/bin
+      copy:
+        src: /home/kni/oc
+        dest: /usr/local/bin/oc
+        mode: 0755
+        remote_src: yes
+    - name: Download Openshift installer
+      get_url:
+        url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-install-linux.tar.gz
+        dest: /home/kni
+        owner: kni
+        group: kni
+        mode: '0750'
+    - name: Uncompress Openshift installer
+      unarchive:
+        src: /home/kni/openshift-install-linux.tar.gz
+        dest: /home/kni
+        remote_src: yes
+    - name: Retrieve the RHCOS ISO URL
+      shell: ./openshift-install coreos print-stream-json | grep location | grep x86_64 | grep iso | cut -d\" -f4
+      args:
+        chdir: /home/kni
+      register: _iso_url
+    - name: Download the RHCOS ISO
+      get_url:
+        url: "{{ _iso_url.stdout }}"
+        dest: /home/kni
+        owner: kni
+        group: kni
+        mode: '0750'
+    - name: Create pull secret file
+      copy:
+        src: pull-secret
+        dest: /home/kni
+        owner: kni
+        group: kni
+        mode: 0640
+    - name: Render install-config template
+      template:
+        src: install-config.j2
+        dest: /home/kni/install-config.yaml
+        owner: kni
+        group: kni
+        mode: 0644
 
     - name: Update OS and reboot host
       block:
