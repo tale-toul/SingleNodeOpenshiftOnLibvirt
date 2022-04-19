@@ -66,6 +66,11 @@
     - name: Apply new SELinux file context to filesystem
       command: restorecon -R -Fv /var/lib/libvirt/images/
 
+    - name: Add hashicorp repo for terraform
+      get_url:
+        url: https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+        dest: /etc/yum.repos.d/hashicorp.repo
+        mode: '0644'
     - name: Install required packages
       dnf:
         name: 
@@ -77,6 +82,7 @@
           - gcc
           - libvirt-devel
           - podman
+          - terraform
         state: present
     - name: Enable and start firewalld service
       service:
@@ -162,7 +168,7 @@
         dest: /home/kni/rhcos-live.x86_64.iso
         owner: kni
         group: kni
-        mode: '0750'
+        mode: '0744'
     - name: Create pull secret file
       copy:
         src: pull-secret
@@ -194,6 +200,36 @@
       shell: podman run --privileged --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release iso ignition embed -fi {{ cluster_name }}/bootstrap-in-place-for-live-iso.ign rhcos-live.x86_64.iso
       args:
         chdir: /home/kni
+    - name: Copy rhcos-live.x86_64.iso to /var/lib/libvirt/images
+      copy:
+        src: /home/kni/rhcos-live.x86_64.iso
+        dest: /var/lib/libvirt/images/rhcos-live.x86_64.iso
+        remote_src: yes
+        owner: qemu
+        group: qemu
+        mode: 0640
+
+    - name: Copy ssh public certificate
+      copy:
+        src: ../Terraform/{{ ssh_certificate }}
+        dest: /home/kni/ssh.pub
+        owner: kni
+        group: kni
+        mode: 0640
+    - name: Copy terraform assets to EC2 instance
+      synchronize:
+        src: ../Terraform/libvirt
+        dest: /home/kni
+        use_ssh_args: yes
+        owner: no
+        group: no
+    - name: Change file ownership and group for terraform assets
+      file:
+        path: /home/kni/libvirt
+        state: directory
+        recurse: yes
+        owner: kni
+        group: kni
 
     - name: Update OS and reboot host
       block:

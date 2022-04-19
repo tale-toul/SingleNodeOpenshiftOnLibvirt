@@ -5,16 +5,9 @@ terraform {
     }
   }
 }
-data "terraform_remote_state" "ec2_instance" {
-  backend = "local"
-
-  config = {
-    path = "../terraform.tfstate"
-  }
-}
 
 provider "libvirt" {
-  uri = "qemu+ssh://ec2-user@${data.terraform_remote_state.ec2_instance.outputs.baremetal_public_ip}/system?keyfile=../${data.terraform_remote_state.ec2_instance.outputs.ssh_certificate}"
+  uri = "qemu:///system"
 }
 
 #Networks
@@ -48,7 +41,7 @@ resource "libvirt_volume" "support_volume" {
 
 resource "libvirt_cloudinit_disk" "support_cloudinit" {
   name = "support.iso"
-  user_data = templatefile("${path.module}/support_cloud_init.tmpl", { auth_key = file("${path.module}/../${data.terraform_remote_state.ec2_instance.outputs.ssh_certificate}") })
+  user_data = templatefile("${path.module}/support_cloud_init.tmpl", { auth_key = file("${path.module}/../ssh.pub") })
   network_config = templatefile("${path.module}/support_network_config.tmpl", { address = "${local.support_host_ip}/24", nameserver = var.support_net_config_nameserver, gateway = local.chucky_gateway })
 }
 
@@ -103,6 +96,13 @@ resource "libvirt_domain" "sno_domain" {
 
   disk {
     volume_id = libvirt_volume.sno_volume.id
+  }
+
+  dynamic "disk" {
+    for_each = fileexists("/var/lib/libvirt/images/rhcos-live.x86_64.iso") ? [1] : []
+    content {
+      file = "/var/lib/libvirt/images/rhcos-live.x86_64.iso"
+    }
   }
 
   network_interface {
