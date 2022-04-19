@@ -72,22 +72,3 @@
       reboot:
         reboot_timeout: 600
       when: _os_update.changed == True
-
-
-#Set up provision VM
-#- name: Set up provision VM
-#  hosts: provision
-#  gather_facts: no
-#  tasks:
-#    - name: Add hashicorpt repo for terraform
-#      get_url:
-#        url: https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-#        dest: /etc/yum.repos.d/hashicorp.repo
-#        mode: '0644'
-#    - name: Copy terraform template to create default storage pool in provisioning VM
-#      synchronize:
-#        src: ../Terraform/provision
-#        dest: .
-#        use_ssh_args: yes
-#        owner: no
-#        group: no
