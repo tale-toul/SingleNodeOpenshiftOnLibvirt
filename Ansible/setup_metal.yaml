@@ -76,8 +76,7 @@
           - git
           - gcc
           - libvirt-devel
-          - ipmitool
-          - httpd-tools
+          - podman
         state: present
     - name: Enable and start firewalld service
       service:
@@ -160,7 +159,7 @@
     - name: Download the RHCOS ISO
       get_url:
         url: "{{ _iso_url.stdout }}"
-        dest: /home/kni
+        dest: /home/kni/rhcos-live.x86_64.iso
         owner: kni
         group: kni
         mode: '0750'
@@ -178,6 +177,23 @@
         owner: kni
         group: kni
         mode: 0644
+    - name: Copy install-config.yaml to {{ cluster_name }}
+      copy:
+        src: /home/kni/install-config.yaml
+        dest: /home/kni/{{ cluster_name }}
+        remote_src: yes
+        owner: kni
+        group: kni
+        mode: 0640
+    - name: Generate the bootstrap-in-place-for-live-iso Ignition Config asset
+      shell: ./openshift-install --dir={{ cluster_name }} create single-node-ignition-config
+      args:
+        chdir: /home/kni
+        creates: "{{ cluster_name }}/bootstrap-in-place-for-live-iso.ign"
+    - name: Embed the ignition data into the RHCOS ISO
+      shell: podman run --privileged --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release iso ignition embed -fi {{ cluster_name }}/bootstrap-in-place-for-live-iso.ign rhcos-live.x86_64.iso
+      args:
+        chdir: /home/kni
 
     - name: Update OS and reboot host
       block:
