@@ -68,18 +68,6 @@ The list of variables its purpose and default value are:
 
      Default value: 8.8.8.8
 
-* **dns_zone**.- DNS base zone for the Openshift cluster.  This is a private zone that is not resolvable outside the virtual networks or EC2 instance so any value can be used.
-
-     Default value:  tale.net
-
-*  **cluster_name**.- Used as the subdomain for the whole cluster DNS name.  For example for a cluster name of **ocp4** and a dns zone of **tale.net** the whole cluster domain is **ocp4.tale.net**
-
-     Default value: ocp4
-
-* **ocp_version**.- Openshift version to be deployed.  Available versions can be seen [here](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/) 
-
-     Default value: 4.9.5
-
 * **sno_mac**.- MAC address for the SNO VM NIC in the routable (chucky) network.  This is used in the DHCP server to assign a known IP to the provision VM in the chucky network.  The letters in the MACs should be in lowercase.
 
      Default value: 52:54:00:9d:41:3c

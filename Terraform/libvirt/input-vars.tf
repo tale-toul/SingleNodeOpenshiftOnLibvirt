@@ -41,24 +41,6 @@ variable "support_net_config_nameserver" {
   default = "8.8.8.8"
 }
 
-variable "dns_zone" {
-  description = "Internal DNS base zone for the Openshift cluster"
-  type = string
-  default = "tale.net"
-}
-
-variable "cluster_name" {
-  description = "Cluster name which is part of the internal DNS domain"
-  type = string
-  default = "ocp4"
-}
-
-variable "ocp_version" {
-  description = "Openshift version number to be deployed"
-  type = string
-  default = "4.9.5"
-}
-
 #MAC ADDRESSES
 #The letters in the MACs should be in lowercase
 variable "sno_mac" {

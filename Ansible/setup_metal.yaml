@@ -63,8 +63,8 @@
       file:
         path: /var/lib/libvirt/images
         mode: '0751' 
-    - name: Apply new SELinux file context to filesystem
-      command: restorecon -R -Fv /var/lib/libvirt/images/
+#    - name: Apply new SELinux file context to filesystem
+#      command: restorecon -R -Fv /var/lib/libvirt/images/
 
     - name: Add hashicorp repo for terraform
       get_url:
@@ -139,6 +139,8 @@
         src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux.tar.gz
         dest: /home/kni
         remote_src: yes
+      become: yes
+      become_user: kni
     - name: Copy oc client to /usr/local/bin
       copy:
         src: /home/kni/oc
@@ -157,6 +159,8 @@
         src: /home/kni/openshift-install-linux.tar.gz
         dest: /home/kni
         remote_src: yes
+      become: yes
+      become_user: kni
     - name: Retrieve the RHCOS ISO URL
       shell: ./openshift-install coreos print-stream-json | grep location | grep x86_64 | grep iso | cut -d\" -f4
       args:
@@ -168,7 +172,7 @@
         dest: /home/kni/rhcos-live.x86_64.iso
         owner: kni
         group: kni
-        mode: '0744'
+        mode: 0644
     - name: Create pull secret file
       copy:
         src: pull-secret
@@ -196,6 +200,8 @@
       args:
         chdir: /home/kni
         creates: "{{ cluster_name }}/bootstrap-in-place-for-live-iso.ign"
+      become: yes
+      become_user: kni
     - name: Embed the ignition data into the RHCOS ISO
       shell: podman run --privileged --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release iso ignition embed -fi {{ cluster_name }}/bootstrap-in-place-for-live-iso.ign rhcos-live.x86_64.iso
       args:
@@ -209,27 +215,18 @@
         group: qemu
         mode: 0640
 
-    - name: Copy ssh public certificate
-      copy:
-        src: ../Terraform/{{ ssh_certificate }}
-        dest: /home/kni/ssh.pub
-        owner: kni
-        group: kni
-        mode: 0640
-    - name: Copy terraform assets to EC2 instance
+    - name: Copy terraform template to create default storage pool in EC2 baremetal instance
       synchronize:
-        src: ../Terraform/libvirt
-        dest: /home/kni
+        src: terraform
+        dest: .
         use_ssh_args: yes
         owner: no
         group: no
-    - name: Change file ownership and group for terraform assets
-      file:
-        path: /home/kni/libvirt
-        state: directory
-        recurse: yes
-        owner: kni
-        group: kni
+    - name: Create default libvirt storage pool
+      terraform:
+        project_path: 'terraform/'
+        state: present
+        force_init: yes
 
     - name: Update OS and reboot host
       block:

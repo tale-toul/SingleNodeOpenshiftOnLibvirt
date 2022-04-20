@@ -98,11 +98,8 @@ resource "libvirt_domain" "sno_domain" {
     volume_id = libvirt_volume.sno_volume.id
   }
 
-  dynamic "disk" {
-    for_each = fileexists("/var/lib/libvirt/images/rhcos-live.x86_64.iso") ? [1] : []
-    content {
-      file = "/var/lib/libvirt/images/rhcos-live.x86_64.iso"
-    }
+  disk {
+    file = "/var/lib/libvirt/images/rhcos-live.x86_64.iso"
   }
 
   network_interface {
@@ -111,7 +108,7 @@ resource "libvirt_domain" "sno_domain" {
   }
 
   boot_device {
-    dev = ["hd","network"]
+    dev = ["hd","cdrom","network"]
   }
 
   graphics {
