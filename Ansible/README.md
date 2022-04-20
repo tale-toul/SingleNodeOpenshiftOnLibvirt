@@ -1,5 +1,7 @@
 # Set up the baremetal host and the support VM
 
+The baremetal host is prepared and configured so that the SNO host and other libvirt KVM resources can be created, and Openshift can be installed inside the SNO host.
+
 ## Subscribe hosts with Red Hat
 The EC2 metal host and the support VM run on RHEL 8 and are subscribed with RH using an activation key, for instructions on how to create the activation key check [Creating Red Hat Customer Portal Activation Keys](https://access.redhat.com/articles/1378093)
 
@@ -62,3 +64,21 @@ The following list contains variables that are automatically assigned:
 * **baremetal_public_ip**.- Contains the public Internet facing IP address of the EC2 instance.  This variable is automatically assigned a value by terraform template **Terraform/main.tf** as an output variable
 
 * **ssh_certificate**.- Filename containing the public ssh key for the certificate injected in the EC2 instance.  This variable is defined in **Terraform/output-vars.tf**
+
+## Setting up the DNS and DHCP services
+
+A separate ansible playbook file (support_setup.yaml) is used to install and set up the DHCP and DNS services in the support VM
+
+This playbook has the following requirements:
+
+* An [activation key](#subscribe-the-host-with-red-hat) is required to register the VMs with Red Hat.  
+* An [ssh private key](#add-the-ec2-user-ssh-key) to connect to the VMs. This ssh key is the same used by the EC2 metal instance, the terraform template injects the same ssh key in all KVM VMs and EC2 instance.
+* A [pull secret](https://console.redhat.com/openshift/install/metal/user-provisioned) for the Openshift installation.  Download the pull secret and copy it to **Ansible/pull-secret**.  
+
+### Running the playbook for the support VM
+
+The playbook is run with a command like the following, similar to the one used to set up the EC2 instance:
+
+```
+$ ansible-playbook -i inventory -vvv support_setup.yaml --vault-id vault-id 
+```
