@@ -24,21 +24,6 @@ output "chucky_gateway" {
   description = "Gateway IP for the routable chucky network"
 }
 
-output "dns_zone" {
-  value     = var.dns_zone
-  description = "DNS base zone for the Openshift cluster"
-}
-
-output "cluster_name" {
-  value = var.cluster_name
-  description = "Cluster name that is part of the DNS domain"
-}
-
-output "ocp_version" {
-  value = var.ocp_version
-  description = "Openshift version number to be deployed"
-}
-
 output "sno_mac" {
   value       = var.sno_mac
   description = "MAC address for the SNO VM NIC"

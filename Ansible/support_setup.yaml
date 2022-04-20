@@ -72,3 +72,23 @@
       reboot:
         reboot_timeout: 600
       when: _os_update.changed == True
+
+- name: Add support nameserver to baremetal host
+  hosts: baremetal
+  gather_facts: no
+  tasks:
+    - name: Load terraform output variables
+      include_vars:
+        dir: group_vars/all
+        extensions:
+          - 'data'
+          - 'var'
+        ignore_unknown_extensions: yes
+    - name: Wait for EC2 instance connection to become available
+      wait_for_connection:
+        timeout: 300
+    - name: Add support nameserver to the configuration
+      blockinfile:
+        path: /etc/resolv.conf
+        block: "nameserver {{ support_host_ip }}"
+        insertbefore: "^nameserver"

@@ -1,1 +1,4 @@
-update_OS: true
+update_OS: false
+cluster_name: ocp4
+ocp_version: 4.9.5
+dns_zone: tale.net

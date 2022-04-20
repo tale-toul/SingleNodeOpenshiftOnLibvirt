@@ -63,9 +63,14 @@
       file:
         path: /var/lib/libvirt/images
         mode: '0751' 
-    - name: Apply new SELinux file context to filesystem
-      command: restorecon -R -Fv /var/lib/libvirt/images/
+#    - name: Apply new SELinux file context to filesystem
+#      command: restorecon -R -Fv /var/lib/libvirt/images/
 
+    - name: Add hashicorp repo for terraform
+      get_url:
+        url: https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+        dest: /etc/yum.repos.d/hashicorp.repo
+        mode: '0644'
     - name: Install required packages
       dnf:
         name: 
@@ -77,6 +82,7 @@
           - gcc
           - libvirt-devel
           - podman
+          - terraform
         state: present
     - name: Enable and start firewalld service
       service:
@@ -133,6 +139,8 @@
         src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux.tar.gz
         dest: /home/kni
         remote_src: yes
+      become: yes
+      become_user: kni
     - name: Copy oc client to /usr/local/bin
       copy:
         src: /home/kni/oc
@@ -151,6 +159,8 @@
         src: /home/kni/openshift-install-linux.tar.gz
         dest: /home/kni
         remote_src: yes
+      become: yes
+      become_user: kni
     - name: Retrieve the RHCOS ISO URL
       shell: ./openshift-install coreos print-stream-json | grep location | grep x86_64 | grep iso | cut -d\" -f4
       args:
@@ -162,7 +172,7 @@
         dest: /home/kni/rhcos-live.x86_64.iso
         owner: kni
         group: kni
-        mode: '0750'
+        mode: 0644
     - name: Create pull secret file
       copy:
         src: pull-secret
@@ -190,10 +200,33 @@
       args:
         chdir: /home/kni
         creates: "{{ cluster_name }}/bootstrap-in-place-for-live-iso.ign"
+      become: yes
+      become_user: kni
     - name: Embed the ignition data into the RHCOS ISO
       shell: podman run --privileged --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release iso ignition embed -fi {{ cluster_name }}/bootstrap-in-place-for-live-iso.ign rhcos-live.x86_64.iso
       args:
         chdir: /home/kni
+    - name: Copy rhcos-live.x86_64.iso to /var/lib/libvirt/images
+      copy:
+        src: /home/kni/rhcos-live.x86_64.iso
+        dest: /var/lib/libvirt/images/rhcos-live.x86_64.iso
+        remote_src: yes
+        owner: qemu
+        group: qemu
+        mode: 0640
+
+    - name: Copy terraform template to create default storage pool in EC2 baremetal instance
+      synchronize:
+        src: terraform
+        dest: .
+        use_ssh_args: yes
+        owner: no
+        group: no
+    - name: Create default libvirt storage pool
+      terraform:
+        project_path: 'terraform/'
+        state: present
+        force_init: yes
 
     - name: Update OS and reboot host
       block:

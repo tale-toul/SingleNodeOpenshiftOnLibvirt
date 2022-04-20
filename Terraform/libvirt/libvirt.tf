@@ -105,13 +105,17 @@ resource "libvirt_domain" "sno_domain" {
     volume_id = libvirt_volume.sno_volume.id
   }
 
+  disk {
+    file = "/var/lib/libvirt/images/rhcos-live.x86_64.iso"
+  }
+
   network_interface {
     network_id = libvirt_network.chucky.id
     mac        = var.sno_mac
   }
 
   boot_device {
-    dev = ["hd","network"]
+    dev = ["hd","cdrom","network"]
   }
 
   graphics {
