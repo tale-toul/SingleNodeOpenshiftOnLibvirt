@@ -63,8 +63,6 @@
       file:
         path: /var/lib/libvirt/images
         mode: '0751' 
-#    - name: Apply new SELinux file context to filesystem
-#      command: restorecon -R -Fv /var/lib/libvirt/images/
 
     - name: Add hashicorp repo for terraform
       get_url:

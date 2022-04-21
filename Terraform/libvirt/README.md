@@ -125,12 +125,13 @@ $ terraform apply -var-file monaco.vars
 
 ## Created resources
 The template creates the following components:
-* A storage pool.- This is the default storage pool, of type directory, using /var/lib/libvirt/images directory
 * A network. Routable with DHCP disable 
 * A base disk volume using a RHEL8 image, this will be used as the base image for all the VMs that are created later.
 * A disk volume based on the RHEL8 base volume that will be the OS disk for the support VM.  
 * A cloud init disk for the support VM, containing the user data and network configuration defined by two template files.
-* A support VM.  This VM runs the DHCP and DNS services for the OCP cluster.  It is only connected to the routable (chucky) network.
+* A support VM.  This VM runs the DHCP and DNS services for the network hosts.
+* A disk volume based on the RHEL8 base volume that will be the OS disk for the sno VM.  
+* A sno VM.  This VM runs the Openshift service.
 
 ## Dependencies 
 This terraform template depends on the output variables from the main terraform template that creates the metal instance in AWS.  The output variables are obtained from a local backend:

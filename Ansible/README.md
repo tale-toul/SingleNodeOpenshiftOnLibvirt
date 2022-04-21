@@ -1,7 +1,5 @@
 # Set up the baremetal host and the support VM
 
-The baremetal host is prepared and configured so that the SNO host and other libvirt KVM resources can be created, and Openshift can be installed inside the SNO host.
-
 ## Subscribe hosts with Red Hat
 The EC2 metal host and the support VM run on RHEL 8 and are subscribed with RH using an activation key, for instructions on how to create the activation key check [Creating Red Hat Customer Portal Activation Keys](https://access.redhat.com/articles/1378093)
 
@@ -37,9 +35,12 @@ ssh-rsa AAAAB3NzaC1...jBI0mJf/kTbahNNmytsPOqotr8XR+VQ== jjerezro@jjerezro.remote
 ```
 ## Running the playbook to configure the baremetal instance
 
-The playbook **setup_metal.yaml** prepares the baremetal EC2 instance to create the KVM VMs and install the SNO host.
+The playbook **setup_metal.yaml** prepares the baremetal EC2 instance to create the libvirt KVM resources, like SNO and support hosts, another group of tasks creates the ISO image that is used to boot the SNO host from to intall Openshift.
 
-Check the variables in the following section to adapt some of the configuration properties, the variables **subscription_activationkey** and **subscription_org_id** need to be defined, then run the playbook with a command like:
+Check the variables in the following section to adapt some of the configuration properties, the variables **subscription_activationkey** and **subscription_org_id** need to be defined.  Many of the variables are common to playbooks setup_metal.yaml and support_setup.yaml so the recommended way to define them is by assign them a value in the file **group_vars/all/general.var** which is read by both playbooks. 
+
+Run the playbook with a command like:
+
 
 ```
 $ ansible-playbook -i inventory -vvv setup_metal.yaml --vault-id vault-id
