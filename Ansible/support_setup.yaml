@@ -33,7 +33,7 @@
         marker: "# {mark} Ansible block for support variables"
         insertafter: "^\\[support:vars\\]$"
         block: |
-           ansible_ssh_common_args='-o ProxyJump="ec2-user@{{ baremetal_public_ip }}"' 
+           ansible_ssh_common_args='-o ProxyJump="ec2-user@{{ baremetal_public_ip }}"'
     - name: Reload inventory
       meta: refresh_inventory
 

@@ -60,7 +60,7 @@ resource "aws_internet_gateway" "intergw" {
 #EIPS
 resource "aws_eip" "baremetal_eip" {
   vpc = true
-  instance = aws_instance.baremetal.id
+  instance = aws_spot_instance_request.baremetal.spot_instance_id
   depends_on = [aws_internet_gateway.intergw]
   tags = {
       Name = "metaleip-${local.suffix}"
@@ -206,17 +206,25 @@ data "aws_ami" "rhel8" {
 
   filter {
     name = "name"
-    values = ["RHEL*8.5*"]
+    values = ["RHEL*8.4*"]
   }
 }
 
 #Baremetal host
-resource "aws_instance" "baremetal" {
+resource "aws_spot_instance_request" "baremetal" {
   ami = data.aws_ami.rhel8.id
   instance_type = var.instance_type
   subnet_id = aws_subnet.subnet_pub.id
   vpc_security_group_ids = [aws_security_group.sg-ssh-in.id,aws_security_group.sg-web-in.id,aws_security_group.sg-vnc-in.id,aws_security_group.sg-all-out.id,aws_security_group.sg-api-in.id]
   key_name= aws_key_pair.ssh-key.key_name
+
+  spot_type = "one-time"
+  spot_price = "5.00"
+  wait_for_fulfillment = true
+  timeouts {
+    create = "5m"
+    delete = "11m"
+  }
 
   root_block_device {
       volume_size = 40
@@ -236,5 +244,5 @@ resource "aws_instance" "baremetal" {
 
 #Used to extract the public IP address in the output vars
 data "aws_instance" "baremetal-actual" {
-  instance_id = aws_instance.baremetal.id
+  instance_id = aws_spot_instance_request.baremetal.spot_instance_id
 }
