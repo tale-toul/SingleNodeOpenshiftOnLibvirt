@@ -8,7 +8,7 @@ This repository contains terraform templates and ansible playbooks to deploy a [
 
 There are two main parts to complete the installation of the SNO host: 
 * The creation of the infrastructure resources such as the AWS metal instance, the VPC, subnets, the libvirt virtual network, the support VM, the sno empty VM, etc.
-* The Openshift installation in the sno VM.
+* The Openshift installation in the SNO host.
 
 ### Creating the infrastructure resources
 
