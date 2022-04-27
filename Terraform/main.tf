@@ -58,9 +58,22 @@ resource "aws_internet_gateway" "intergw" {
 }
 
 #EIPS
+#Elastic IP (public) for the EC2 metal instance
 resource "aws_eip" "baremetal_eip" {
+  count = var.spot_instance ? 0 : 1
   vpc = true
-  instance = aws_spot_instance_request.baremetal.spot_instance_id
+  instance = aws_instance.baremetal[0].id
+  depends_on = [aws_internet_gateway.intergw]
+  tags = {
+      Name = "metaleip-${local.suffix}"
+  }
+}
+
+#Elastic IP (public) for the EC2 metal instance, when it is a spot instance
+resource "aws_eip" "baremetal_eip_spot" {
+  count = var.spot_instance ? 1 : 0
+  vpc = true
+  instance = aws_spot_instance_request.baremetal[0].spot_instance_id
   depends_on = [aws_internet_gateway.intergw]
   tags = {
       Name = "metaleip-${local.suffix}"
@@ -211,7 +224,9 @@ data "aws_ami" "rhel8" {
 }
 
 #Baremetal host
+# When using a spot instance
 resource "aws_spot_instance_request" "baremetal" {
+  count = var.spot_instance ? 1 : 0
   ami = data.aws_ami.rhel8.id
   instance_type = var.instance_type
   subnet_id = aws_subnet.subnet_pub.id
@@ -242,7 +257,27 @@ resource "aws_spot_instance_request" "baremetal" {
   }
 }
 
-#Used to extract the public IP address in the output vars
-data "aws_instance" "baremetal-actual" {
-  instance_id = aws_spot_instance_request.baremetal.spot_instance_id
+# When using a standard instance
+resource "aws_instance" "baremetal" {
+  count = var.spot_instance ? 0 : 1
+  ami = data.aws_ami.rhel8.id
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.subnet_pub.id
+  vpc_security_group_ids = [aws_security_group.sg-ssh-in.id,aws_security_group.sg-web-in.id,aws_security_group.sg-vnc-in.id,aws_security_group.sg-all-out.id,aws_security_group.sg-api-in.id]
+  key_name= aws_key_pair.ssh-key.key_name
+
+  root_block_device {
+      volume_size = 40
+      delete_on_termination = true
+  }
+
+  ebs_block_device {
+    volume_size = 1000
+    delete_on_termination = true
+    device_name = "/dev/sdb"
+  }
+
+  tags = {
+        Name = "baremetal-${local.suffix}"
+  }
 }

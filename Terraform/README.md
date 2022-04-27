@@ -26,15 +26,20 @@ Some variables are defined in the **Terraform/input-vars.tf** that can be used t
 
 * **region_name**.- AWS Region where the EC2 instance and other resources are created. Keep in mind that the same infrastructure may incur different costs depending on the region.
 
-Default value: us-east-1
+     Default value: us-east-1
 
 * **ssh-keyfile**.- Name of the file with the public part of the SSH key to transfer to the EC2 instance. This public ssh keyfile will be injected into the EC2 instance so the ec2-user can later connect via ssh using the corresponding private part.
 
-Default value: ssh.pub
+     Default value: ssh.pub
 
 * **instance_type**.- AWS instance type for the hypervisor machine. This must be a metal instance.
 
-Default value: c5n.metal
+     Default value: c5n.metal
+
+* **spot_instance**.- Determines if the AWS EC2 metal instance created is an spot instance or not.  Using a spot instance reduces cost but is not guaranteed to be available for long periods.
+
+     Default = false
+
 
 ## Applying the terraform template
 
