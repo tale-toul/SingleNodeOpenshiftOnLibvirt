@@ -4,6 +4,8 @@
 
 This repository contains terraform templates and ansible playbooks to deploy a [Single Node Openshift](https://docs.openshift.com/container-platform/4.9/installing/installing_sno/install-sno-preparing-to-install-sno.html) (SNO) in a metal instance in AWS.
 
+The SNO generated using this repository is compatible with Openshift Virtualization.
+
 ## Installation instructions
 
 There are two main parts to complete the installation of the SNO host: 
