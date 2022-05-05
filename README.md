@@ -51,7 +51,7 @@ And run the following command:
 
 ## Install and set up NGINX
 
-The playbook **rev_proxy.yaml** can be used to install and set up the NGINX reverse proxy automatically.
+The playbook **rev_proxy.yaml** can be used to install and set up the NGINX reverse proxy in the EC2 instance.
 
 A specific variable is used in this playbook:
 
