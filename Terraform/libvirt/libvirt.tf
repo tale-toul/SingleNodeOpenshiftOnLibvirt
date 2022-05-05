@@ -110,6 +110,10 @@ resource "libvirt_domain" "sno_domain" {
     file = "/var/lib/libvirt/images/rhcos-live.x86_64.iso"
   }
 
+  cpu {
+    mode = "host-passthrough"
+  }
+
   network_interface {
     network_id = libvirt_network.chucky.id
     mac        = var.sno_mac
