@@ -20,7 +20,7 @@ The creation of the infrastrucutre resources is divided in 4 parts, all must be 
 
 * **Set up the baremetal host**.- To configure the baremetal instance to support the creation of libvirt KVM resources, the ansible playbook **Ansible/setup_metal.yaml** is used.  Follow the instruction at [Ansible/README.md](Ansible/README.md)
 
-* **Optionally** get more insights about the libvirt resources, run [virt manager](https://virt-manager.org/) on the localhost to connect to the libvirt daemon on the baremetal host.  The command uses the public IP address of the EC2 instance and the _private_ part of the ssh key injected into the instance with terraform.  This command may take a couple minutes to stablish the connection before actually showing the virt-manager interface:
+* (Optionall) Get more insights into the libvirt resources, run [virt manager](https://virt-manager.org/) on the localhost to connect to the libvirt daemon on the baremetal host.  The command uses the public IP address of the EC2 instance and the _private_ part of the ssh key injected into the instance with terraform.  This command may take a couple minutes to stablish the connection before actually showing the virt-manager interface:
 ```
 $ virt-manager -c 'qemu+ssh://ec2-user@44.200.144.12/system?keyfile=ssh.key'
 ```
