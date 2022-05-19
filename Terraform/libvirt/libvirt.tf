@@ -43,8 +43,8 @@ resource "libvirt_volume" "rhel_volume" {
 resource "libvirt_volume" "support_volume" {
   name = "support.qcow2"
   base_volume_id = libvirt_volume.rhel_volume.id
-  #50GB
-  size = 53687091200
+  #120GB
+  size = 128849018880
 }
 
 resource "libvirt_cloudinit_disk" "support_cloudinit" {
