@@ -40,6 +40,9 @@ Some variables are defined in the **Terraform/input-vars.tf** that can be used t
 
      Default = false
 
+* **ebs_disk_size**.- Size, in Megabytes, of the additional EBS disk attached to the metal instance.  This disk is used to store the libvirt/KVM Virtual Machine disks.
+
+     Default value: 1000
 
 ## Applying the terraform template
 
