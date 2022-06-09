@@ -33,6 +33,11 @@ ssh-rsa AAAAB3NzaC1...jBI0mJf/kTbahNNmytsPOqotr8XR+VQ== jjerezro@jjerezro.remote
 $ cat ~/.ssh/upi-ssh.pub 
 ssh-rsa AAAAB3NzaC1...jBI0mJf/kTbahNNmytsPOqotr8XR+VQ== jjerezro@jjerezro.remote.csb
 ```
+
+## Get a pull secret
+
+Download a pull secret from [Red Hat](https://console.redhat.com/openshift/install/metal/user-provisioned) and copy it to **Ansible/pull-secret**.
+
 ## Running the playbook to configure the baremetal instance
 
 The playbook **setup_metal.yaml** prepares the baremetal EC2 instance to create the libvirt KVM resources, like SNO and support hosts, another group of tasks creates the ISO image that is used to boot the SNO host from to intall Openshift.
@@ -74,7 +79,6 @@ This playbook has the following requirements:
 
 * An [activation key](#subscribe-the-host-with-red-hat) is required to register the VMs with Red Hat.  
 * An [ssh private key](#add-the-ec2-user-ssh-key) to connect to the VMs. This ssh key is the same used by the EC2 metal instance, the terraform template injects the same ssh key in all KVM VMs and EC2 instance.
-* A [pull secret](https://console.redhat.com/openshift/install/metal/user-provisioned) for the Openshift installation.  Download the pull secret and copy it to **Ansible/pull-secret**.  
 
 ### Running the playbook for the support VM
 
