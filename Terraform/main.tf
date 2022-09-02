@@ -1,4 +1,13 @@
 #PROVIDERS
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "4.28.0"
+    }
+  }
+}
+
 provider "aws" {
   region = var.region_name
 }
@@ -219,7 +228,7 @@ data "aws_ami" "rhel8" {
 
   filter {
     name = "name"
-    values = ["RHEL*8.4*"]
+    values = ["RHEL*9.0*"]
   }
 }
 

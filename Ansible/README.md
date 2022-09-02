@@ -1,7 +1,7 @@
 # Set up the baremetal host and the support VM
 
 ## Subscribe hosts with Red Hat
-The EC2 metal host and the support VM run on RHEL 8 and are subscribed with RH using an activation key, for instructions on how to create the activation key check [Creating Red Hat Customer Portal Activation Keys](https://access.redhat.com/articles/1378093)
+The EC2 metal host and the support VM run on RHEL 9 and are subscribed with RH using an activation key, for instructions on how to create the activation key check [Creating Red Hat Customer Portal Activation Keys](https://access.redhat.com/articles/1378093)
 
 The activation key data is stored in the file **Ansible/group_vars/all/subscription.data**.  The variables defined in this file are used by the ansible playbook.
 ```
@@ -40,13 +40,11 @@ Download a pull secret from [Red Hat](https://console.redhat.com/openshift/insta
 
 ## Running the playbook to configure the baremetal instance
 
-The playbook **setup_metal.yaml** prepares the baremetal EC2 instance to create the libvirt KVM resources, like SNO and support hosts, another group of tasks creates the ISO image that is used to boot the SNO host from to intall Openshift.
+The playbook **setup_metal.yaml** prepares the baremetal EC2 instance to create the libvirt/KVM resources, like the SNO and support VMs, also creates the ISO image that is used to boot the SNO host and start the Openshift installation.
 
-Check the variables in the following section to adapt some of the configuration properties, the variables **subscription_activationkey** and **subscription_org_id** need to be defined.  Many of the variables are common to playbooks setup_metal.yaml and support_setup.yaml so the recommended way to define them is by assign them a value in the file **group_vars/all/general.var** which is read by both playbooks. 
+Check the variables in the following section to adapt some of the configuration properties, the variables **subscription_activationkey** and **subscription_org_id** need to be defined, see [Subscribe host with Red Hat](#subscribe-hosts-with-red-hat).  Many of the variables are common to playbooks setup_metal.yaml and support_setup.yaml so the recommended way to define them is by assign them a value in the file **group_vars/all/general.var** which is read by both playbooks. 
 
 Run the playbook with a command like:
-
-
 ```
 $ ansible-playbook -i inventory -vvv setup_metal.yaml --vault-id vault-id
 ```
@@ -57,15 +55,23 @@ The following list contains variables that can be defined by the user:
 
 * **subscription_activationkey** and **subscription_org_id**.- Contain the activation key and organiaztion ID required to subscribe the RHEL host as explained in section [Subscribe hosts with Red Hat](#subscribe-hosts-with-red-hat).  These variables must be assigned by the user.
 
-* **update_OS**.- Whether to update the Operating system and reboot the host (true) or not (false).  Rebooting the EC2 instance is time consuming and may take between 10 and 20 minutes.  This variable is defined in the file **Ansible/group_vars/all/general.var**. Default value: **false**
+* **update_OS**.- Whether to update the Operating system and reboot the host (true) or not (false).  Rebooting the EC2 instance is time consuming and may take between 10 and 20 minutes.  This variable is defined in the file **Ansible/group_vars/all/general.var**. 
 
-* **cluster_name**.- Cluster name, used as the first part of the whole DNS domain name used by the SNO host.  Defined in **Ansible/group_vars/all/general.var**.  Default value: **ocp4**
+     Default value: **false**
 
-* **dns_zone**.- DNS domain name used by the cluster, the whole DNS domain will be \<cluster_name\>.\<dns_zone\>. Defined in **Ansible/group_vars/all/general.var**.  Default value: **tale.net**
+* **cluster_name**.- Cluster name, used as the first part of the whole DNS domain name used by the SNO host.  Defined in **Ansible/group_vars/all/general.var**.  
 
-* **ocp_version**.- Openshift version to be deployed.  Defined in **Ansible/group_vars/all/general.var**.  Default value: **4.9.5**
+     Default value: **ocp4**
 
-The following list contains variables that are automatically assigned:
+* **dns_zone**.- private DNS domain used by the cluster, the whole DNS domain will be \<cluster_name\>.\<dns_zone\>.  This domain will be resolved by the DNS server in the supporting host and is not accessible from the Internet.  Defined in **Ansible/group_vars/all/general.var**.  
+
+     Default value: **tale.net**
+
+* **ocp_version**.- Openshift version to be deployed.  Defined in **Ansible/group_vars/all/general.var**.  
+
+     Default value: **4.9.5**
+
+The following variables are automatically assigned:
 
 * **baremetal_public_ip**.- Contains the public Internet facing IP address of the EC2 instance.  This variable is automatically assigned a value by terraform template **Terraform/main.tf** as an output variable
 

@@ -32,7 +32,7 @@ commands will detect it and remind you to do so if necessary.
 ```
 ## Input variables
 
-Many aspects of the infrastructure created by terraform can be modified by assigning different values to the variables defined in the file **input-vars.tf**
+Many aspects of the infrastructure created by terraform can be modified with the variables defined in the file **input-vars.tf**
 
 All variables contain default values so it is not neccessary to modify them in order to create a funtioning infrastructure. 
 
@@ -86,17 +86,15 @@ variable "chucky_net_addr" {
 ```
 * Assing the values in the command line.- Values assigned in the command line overwrite the default values in the input-vars.tf file.
 ```
-$ terraform apply -var='number_of_workers=6'  -var='cluster_name="monaco"' -var='worker_resources={"memory":"16384","vcpu":6}' \
-  -var='chucky_net_addr=192.168.55.0/24' -var='support_net_config_nameserver=169.254.169.253' -var='dns_zone=benaka.cc'
+$ terraform apply -var='support_resources={"memory":"16384","vcpu":6}' \
+  -var='chucky_net_addr=192.168.55.0/24' -var='support_net_config_nameserver=169.254.169.253'
 ```
 * Add the variable assignments to a file and call that file in the command line.  For example, the following content is added to the file monaco.vars
 
 ```
-cluster_name = "monaco"
 support_resources = {"memory":"16384","vcpu":6}
 chucky_net_addr = "192.168.55.0/24"
 support_net_config_nameserver = "169.254.169.253"
-dns_zone = "benaka.cc"
 ```
 And the terraform command to use those definitions is:
 ```
@@ -107,20 +105,24 @@ $ terraform apply -var-file monaco.vars
 
 * Add the RHEL 8 disk image 
 
-     Get the qcow2 image for RHEL 8 from [https://access.redhat.com/downloads/](https://access.redhat.com/downloads/), click on Red Hat Enterprise Linux 8 and download Red Hat Enterprise Linux 8.5 KVM Guest Image.
+     Get the qcow2 image for RHEL 8 from [https://access.redhat.com/downloads/](https://access.redhat.com/downloads/), click on Red Hat Enterprise Linux 8 and download the latest Red Hat Enterprise Linux 8 KVM Guest Image.
 
      Keep in mind that the RHEL image is more than 700MB in size so a fast Internet connection is recommended.
 
      Copy the image to **Terraform/libvirt/rhel8.qcow2**.  This is the default location and name that the terraform template uses to locate the file, if the file is in a different location or has a different name, update the variable **rhel8_image_location** by defining the variable in the command line.
 ```
-$ cp /home/user1/Downloads/rhel-8.5-x86_64-kvm.qcow2 Terraform/libvirt/rhel8.qcow2
+cp /home/user1/Downloads/rhel-8.5-x86_64-kvm.qcow2 Terraform/libvirt/rhel8.qcow2
 ```
 
 * If this is a fresh deployment, delete any previous **terraform.tfstate** file that may be laying around from previous attempts.
 
-* Use a command like the following to deploy the infrastructure.  
+* Use a command like the following to deploy the infrastructure.
 ```
-$ terraform apply -var-file monaco.vars
+terraform apply -var-file monaco.vars
+```
+     Since all variables have default values it is possible to simply run the `terraform apply` command without any variable definition:
+```
+terraform apply
 ```
 
 ## Created resources

@@ -78,9 +78,9 @@
           - tmux
           - git
           - gcc
-          - libvirt-devel
           - podman
           - terraform
+          - python3-cryptography
         state: present
     - name: Enable and start firewalld service
       service:

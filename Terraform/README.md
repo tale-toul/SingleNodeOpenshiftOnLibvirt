@@ -1,7 +1,17 @@
 # AWS infrastructure 
 
-The terraform template in this directory creates an EC2 metal instance in AWS to be used as a base to deploy the libvirt/KVM resources required to deploy the SNO host.
+The terraform template in this directory creates a metal EC2 instance in AWS that wil be used as a base to create the libvirt/KVM resources required to deploy the SNO host.
 
+### Terraform installation
+
+[Terraform](https://www.terraform.io/) must be installed in the local host.
+  The terraform installation is straight forward, just follow the instructions for your operating system in the [terraform site](https://www.terraform.io/downloads.html)
+
+Verify that terraform is working:
+
+```shell
+ # terraform --version
+```
 ## Module initialization
 
 Before running terraform for the first time, the modules used by the template must be downloaded and initialized, this requires an active Internet connection.
@@ -13,8 +23,8 @@ $ terraform init
 
 Initializing the backend...
 ``` 
+The AWS account credentials must be defined in the file $HOME/.aws/credentials or in the environment variables AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY as explained in terraform [documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#shared-configuration-and-credentials-files)
 
-Terraform needs access to credentials for an AWS user with privileges to create resources, these can be defined in a file containing the access key ID and the access key secret with the following format. Put this file in ~/.aws/credentials:
 ``` 
 [default]
 aws_access_key_id=xxxx
@@ -46,29 +56,27 @@ Some variables are defined in the **Terraform/input-vars.tf** that can be used t
 
 ## Applying the terraform template
 
-Copy a public ssh key file to the Terraform directory, the default expected name for the file is **ssh.pub**, if a different name is used, the variable **ssh-keyfile** must be updated accordingly.
+Copy the public ssh key file to the Terraform directory, the default expected name for the file is **ssh.pub**, if a different name is used, the variable **ssh-keyfile** must be updated accordingly.
 
+Define the variables in a file:
+``` 
+cat single.vars
+ region_name = "us-east-1"
+ ssh-keyfile = "upi.ssh.pub"
+``` 
 Apply the template with a command like:
-
+``` 
+terraform apply -var-file single.vars
+``` 
+Alternatively the variable definitions can be included in the command line:
 ``` 
 $ terraform apply -var region_name=us-east-1 -var ssh-keyfile=baremetal-ssh.pub -var instance_type=c5.metal -var spot_instance=true
 ``` 
-Or add the variable assignments to a file and call that file in the command line. For example, the following content is added to the file sno_aws.vars
-``` 
-region_name = "us-east-1"
-ssh-keyfile = "baremetal-ssh.pub"
-instance_type = "c5.metal"
-``` 
-And call it in with the option **-var-file**, for example:
-
-``` 
-$ terraform apply -var-file sno_aws.vars
-``` 
 
 ## Connecting to the EC2 instance
-It may take a few minutes after creation for the EC2 instance to be ready and accept connections.
+It may take a few minutes for the metal EC2 instance to become available and accept connections.
 
-Ssh is used to connect to the EC2 instance created by terraform.
+Ssh is used to connect to the metal EC2 instance created by terraform.
 
 The elements required are:
 
